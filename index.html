@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>美元指数 四宫格</title>
+<style>
+  :root { --bg:#ffffff; --panel:#f5f6f8; --line:#e0e3eb; --text:#131722; --dim:#787b86; }
+  * { box-sizing:border-box; }
+  html, body { height:100%; }
+  body { margin:0; background:var(--bg); color:var(--text); font:13px/1.4 -apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; display:flex; flex-direction:column; }
+  .bar { display:flex; align-items:center; gap:12px; padding:6px 10px; background:var(--panel); border-bottom:1px solid var(--line); flex:0 0 auto; }
+  .bar b { font-size:14px; }
+  .bar .dim { color:var(--dim); font-size:12px; }
+  .grid { flex:1 1 auto; min-height:0; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:4px; padding:4px; }
+  .cell { min-height:0; min-width:0; border:1px solid var(--line); }
+  @media (max-width:900px) {
+    body { height:auto; }
+    .grid { display:block; }
+    .cell { height:75vh; margin-bottom:4px; }
+  }
+</style>
+</head>
+<body>
+<div class="bar">
+  <b>美元指数 CFD · 四宫格</b>
+  <span class="dim">数据：Capital.com 美元指数 CFD（TradingView 小部件）· 每个窗格左上角的周期按钮可单独切换</span>
+</div>
+<div class="grid" id="grid"></div>
+<script src="https://s3.tradingview.com/tv.js"></script>
+<script>
+// 四个窗格的默认周期（分钟数；D = 日线）。想改默认周期，改这里即可。
+const PANES = ["15", "60", "240", "D"];
+const SYMBOL = "CAPITALCOM:DXY";
+const UP = "#ef5350", DOWN = "#26a69a";        // 红涨绿跌
+
+const grid = document.getElementById("grid");
+PANES.forEach((interval, i) => {
+  const cell = document.createElement("div"); cell.className = "cell"; cell.id = "pane" + i; grid.appendChild(cell);
+  new TradingView.widget({
+    container_id: cell.id, autosize: true,
+    symbol: SYMBOL, interval, timezone: "Asia/Shanghai", theme: "light", style: "1", locale: "zh_CN",
+    toolbar_bg: "#ffffff", enable_publishing: false, allow_symbol_change: false,   // 品种只用美元指数
+    hide_side_toolbar: false, withdateranges: true, save_image: false, hide_volume: true, disabled_features: ["create_volume_indicator_by_default"],   // 只放 RSI，不要成交量
+    studies: ["STD;Divergence%1Indicator"],                                         // 只放一个 RSI Divergence Indicator（RSI 背离，周期默认 14；免费小部件不能预设周期）
+    overrides: {                                                                    // 红涨绿跌
+      "paneProperties.background": "#ffffff", "paneProperties.backgroundType": "solid",
+      "paneProperties.vertGridProperties.color": "rgba(0,0,0,0)", "paneProperties.horzGridProperties.color": "rgba(0,0,0,0)",   // 不要网格
+      "mainSeriesProperties.candleStyle.upColor": UP, "mainSeriesProperties.candleStyle.downColor": DOWN,
+      "mainSeriesProperties.candleStyle.borderUpColor": UP, "mainSeriesProperties.candleStyle.borderDownColor": DOWN,
+      "mainSeriesProperties.candleStyle.wickUpColor": UP, "mainSeriesProperties.candleStyle.wickDownColor": DOWN
+    }
+  });
+});
+</script>
+</body>
+</html>
